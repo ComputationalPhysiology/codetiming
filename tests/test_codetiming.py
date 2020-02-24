@@ -61,17 +61,24 @@ def test_lap_time():
 def test_multiple_timers():
 
     """Test that .last attribute is properly set"""
-    t = TimerCollection(name="multiple_timers")
-    # num_timers =
-    assert len(t.lap_times) == 0
+    timers = TimerCollection(name="multiple_timers")
+
     sleeptime = 0.02
-    for i in range(5):
-        t.start("0")
-        time.sleep(sleeptime)
-        t.stop("0")
-        assert len(t.lap_times["0"]) == i + 1
-        assert sleeptime <= t.lap_times["0"][-1] < sleeptime * 1.5
+    timers.start("fun1")
+    time.sleep(sleeptime)
+    timers.stop("fun1")
+
+    timers.start("fun2")
+    time.sleep(2 * sleeptime)
+    timers.stop("fun2")
+
+    timers.start("fun3")
+    time.sleep(3 * sleeptime)
+    timers.stop("fun3")
+
+    for i, (name, t) in enumerate(timers.timers.items()):
+        assert t.total_time > (i + 1) * sleeptime
 
 
 if __name__ == "__main__":
-    test_lap_time()
+    test_multiple_timers()
