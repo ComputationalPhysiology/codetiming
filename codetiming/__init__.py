@@ -26,4 +26,4 @@ from codetiming._timer import Timer, TimerError, TimerCollection  # noqa
 
 
 # Versioning is handled by bump2version
-__version__ = "1.1.0"
+__version__ = "2.0.0"
