@@ -71,8 +71,8 @@ class TimerCollection:
         self.lap_times: Dict[str, List[float]] = dict()
         self._current_timer = None
 
-    def __repr__(self):
-        s = f"{__class__.__name__}("
+    def __repr__(self) -> str:
+        s = f"{self.__class__.__name__}("
         args = ""
         if self.name is not None:
             args += self.name
@@ -81,7 +81,7 @@ class TimerCollection:
         s += args.strip(",").strip(" ") + ")"
         return s
 
-    def default_name(self):
+    def default_name(self) -> str:
         try:
             name = next(iter(self.timers.keys()))
         except StopIteration:
@@ -89,7 +89,7 @@ class TimerCollection:
         finally:
             return name
 
-    def start(self, name: Optional[Union[str, List[str]]] = None):
+    def start(self, name: Optional[Union[str, List[str]]] = None) -> None:
         if name is None:
             name = self.default_name()
 
@@ -102,7 +102,7 @@ class TimerCollection:
                 self.lap_times[n] = []
             self.timers[n].start()
 
-    def stop(self, name: Optional[Union[str, List[str]]] = None):
+    def stop(self, name: Optional[Union[str, List[str]]] = None) -> None:
         if name is None:
             name = self.default_name()
 
@@ -120,18 +120,17 @@ class TimerCollection:
             self.lap_times[n].append(self.timers[n].stop())
 
     @property
-    def total_time(self):
+    def total_time(self) -> float:
         return sum(self.total_times.values())
 
     @property
-    def percentage_time(self):
+    def percentage_time(self) -> Dict[str, float]:
         tot = self.total_time
         return {k: t.total_time / tot for k, t in self.timers.items()}
 
     @property
-    def total_times(self):
+    def total_times(self) -> Dict[str, float]:
         return {k: t.total_time for k, t in self.timers.items()}
 
-    def report(self, name: Union[List[str], str] = None) -> str:
+    def report(self) -> str:
         return utils.format_output("Total times", self.total_times)
-

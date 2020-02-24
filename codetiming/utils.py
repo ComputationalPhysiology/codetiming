@@ -7,7 +7,7 @@ def format_output(
     width: int = 50,
     precision: int = 5,
     key_value_ratio: float = 0.8,
-):
+) -> str:
     msg = "\n"
     msg += f"{header}:".center(width + 2, " ") + "\n"
     msg += "-" * (width + 2)
