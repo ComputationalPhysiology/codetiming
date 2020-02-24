@@ -77,7 +77,7 @@ def test_multiple_timers():
     timers.stop("fun3")
 
     for i, (name, t) in enumerate(timers.timers.items()):
-        assert t.total_time > (i + 1) * sleeptime
+        assert (i + 1) * sleeptime < t.total_time < (i + 2) * sleeptime
 
 
 if __name__ == "__main__":
