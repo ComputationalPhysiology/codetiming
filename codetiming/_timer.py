@@ -7,9 +7,12 @@ https://pypi.org/project/codetiming/ for more details.
 # Standard library imports
 import math
 import time
+import logging
 from contextlib import ContextDecorator
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, List, Union
+
+from codetiming import utils
 
 
 class TimerError(Exception):
@@ -25,7 +28,7 @@ class Timer(ContextDecorator):
     _start_time: Optional[float] = field(default=None, init=False, repr=False)
     name: Optional[str] = None
     text: str = "Elapsed time: {:0.4f} seconds"
-    logger: Optional[Callable[[str], None]] = logger.info
+    logger: Optional[Callable[[str], None]] = print
     last: float = field(default=math.nan, init=False, repr=False)
 
     def start(self) -> None:
@@ -130,6 +133,5 @@ class TimerCollection:
         return {k: t.total_time for k, t in self.timers.items()}
 
     def report(self, name: Union[List[str], str] = None) -> str:
-
-        return format_output("Total times", self.total_times)
+        return utils.format_output("Total times", self.total_times)
 
