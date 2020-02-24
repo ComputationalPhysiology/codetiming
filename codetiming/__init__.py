@@ -22,7 +22,7 @@ You can use `codetiming.Timer` in several different ways:
 """
 
 # Codetiming imports
-from codetiming._timer import Timer, TimerError  # noqa
+from codetiming._timer import Timer, TimerError, TimerCollection  # noqa
 
 # Versioning is handled by bump2version
 __version__ = "1.1.0"

@@ -9,10 +9,7 @@ import math
 import time
 from contextlib import ContextDecorator
 from dataclasses import dataclass, field
-from typing import Any, Callable, ClassVar, Optional
-
-# Codetiming imports
-from codetiming._timers import Timers
+from typing import Any, Callable, Dict, Optional
 
 
 class TimerError(Exception):
@@ -23,11 +20,12 @@ class TimerError(Exception):
 class Timer(ContextDecorator):
     """Time your code using a class, context manager, or decorator"""
 
-    timers: ClassVar[Timers] = Timers()
+    total_time: float = 0.0
+
     _start_time: Optional[float] = field(default=None, init=False, repr=False)
     name: Optional[str] = None
     text: str = "Elapsed time: {:0.4f} seconds"
-    logger: Optional[Callable[[str], None]] = print
+    logger: Optional[Callable[[str], None]] = logger.info
     last: float = field(default=math.nan, init=False, repr=False)
 
     def start(self) -> None:
@@ -49,8 +47,7 @@ class Timer(ContextDecorator):
         # Report elapsed time
         if self.logger:
             self.logger(self.text.format(self.last))
-        if self.name:
-            self.timers.add(self.name, self.last)
+        self.total_time += self.last
 
         return self.last
 
@@ -62,3 +59,77 @@ class Timer(ContextDecorator):
     def __exit__(self, *exc_info: Any) -> None:
         """Stop the context manager timer"""
         self.stop()
+
+
+class TimerCollection:
+    def __init__(self, name: Optional[str] = None):
+        self.name = name
+        self.timers: Dict[str, Timer] = dict()
+        self.lap_times: Dict[str, List[float]] = dict()
+        self._current_timer = None
+
+    def __repr__(self):
+        s = f"{__class__.__name__}("
+        args = ""
+        if self.name is not None:
+            args += self.name
+        for name in self.timers.keys():
+            args += f", {name}"
+        s += args.strip(",").strip(" ") + ")"
+        return s
+
+    def default_name(self):
+        try:
+            name = next(iter(self.timers.keys()))
+        except StopIteration:
+            name = "0"
+        finally:
+            return name
+
+    def start(self, name: Optional[Union[str, List[str]]] = None):
+        if name is None:
+            name = self.default_name()
+
+        if isinstance(name, str):
+            name = [name]
+        for n in name:
+            if n not in self.timers:
+                self.timers[n] = Timer(name=n)
+            if n not in self.lap_times:
+                self.lap_times[n] = []
+            self.timers[n].start()
+
+    def stop(self, name: Optional[Union[str, List[str]]] = None):
+        if name is None:
+            name = self.default_name()
+
+        if isinstance(name, str):
+            name = [name]
+        for n in name:
+            if n not in self.timers:
+                raise TimerError(
+                    f"Timer {name} is not running. Use .start() to start it"
+                )
+            if n not in self.lap_times:
+                raise TimerError(
+                    f"Timer {name} is not running. Use .start() to start it"
+                )
+            self.lap_times[n].append(self.timers[n].stop())
+
+    @property
+    def total_time(self):
+        return sum(self.total_times.values())
+
+    @property
+    def percentage_time(self):
+        tot = self.total_time
+        return {k: t.total_time / tot for k, t in self.timers.items()}
+
+    @property
+    def total_times(self):
+        return {k: t.total_time for k, t in self.timers.items()}
+
+    def report(self, name: Union[List[str], str] = None) -> str:
+
+        return format_output("Total times", self.total_times)
+
